@@ -3,6 +3,19 @@
 <head>
     <title>49동 바이올린 소녀는 CC가 하고싶다</title>
     <meta charset="utf-8">
+    <style>
+        /* 이미지가 너무 크거나 삐져나가지 않게 기본 설정을 추가했습니다 */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+        }
+        /* iframe의 여백을 조절합니다 */
+        .video-container {
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <h1><a href="index.html">WEB</a></h1>
@@ -11,43 +24,40 @@
         <li><a href="2.html">CSS</a></li>
         <li><a href="3.html">Javascript</a></li>
     </ol>
+
     <h2>찬양하라 이채원</h2>
-    <p>
-        <iframe width="560" height="315" src="https://guitaristchan.github.io/-B-/"
-    </p>
-    <p>
-        <div id="disqus_thread"></div>
-<script>
-    /**
-    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
-    /*
-    var disqus_config = function () {
-    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    */
-    (function() { // DON'T EDIT BELOW THIS LINE
-    var d = document, s = d.createElement('script');
-    s.src = 'https://web1-0n1b6zbssi.disqus.com/embed.js';
-    s.setAttribute('data-timestamp', +new Date());
-    (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></p>
-    <img src="violin_girl.png" width="100%">
-    <p><!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/69f05b913aaa4c1c3adc0f61/1jn9ebc6b';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script--></p>
+
+    <!-- 1. iframe 태그 수정: 닫는 괄호(>)와 종료 태그(</iframe>)를 추가했습니다 -->
+    <div class="video-container">
+        <iframe width="560" height="315" src="https://guitaristchan.github.io/-B-/" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+    <!-- 2. 이미지 태그: 파일이 같은 폴더에 'violin_girl.png' 이름으로 있는지 꼭 확인하세요 -->
+    <img src="violin_girl.png" alt="49동 바이올린 소녀 로고">
+
+    <!-- 3. Disqus 댓글창: p 태그 대신 div로 감싸는 것이 정석입니다 -->
+    <div id="disqus_thread"></div>
+    <script>
+        (function() { 
+            var d = document, s = d.createElement('script');
+            s.src = 'https://web1-0n1b6zbssi.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    <!-- 4. Tawk.to 채팅 상담 스크립트 -->
+    <script type="text/javascript">
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/69f05b913aaa4c1c3adc0f61/1jn9ebc6b';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+        })();
+    </script>
 </body>
 </html>
