@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미대 야구부 기록실</title>
+    <style>
+        /* 깔끔하고 직관적인 UI/UX 스타일링 */
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #111; font-weight: 800; margin-bottom: 30px; }
+        
+        .search-container { max-width: 600px; margin: 0 auto 30px; display: flex; justify-content: center; }
+        input[type="text"] { width: 100%; padding: 15px 25px; font-size: 16px; border: 2px solid #ddd; border-radius: 50px; outline: none; transition: all 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input[type="text"]:focus { border-color: #ff6600; box-shadow: 0 4px 12px rgba(255,102,0,0.2); }
+        
+        .section-container { max-width: 1200px; margin: 0 auto 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+        h2 { background: #2c3e50; color: #fff; margin: 0; padding: 18px 20px; font-size: 18px; font-weight: 600; letter-spacing: -0.5px; }
+        
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 14px; }
+        th, td { padding: 14px 16px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+        th { background-color: #f8f9fa; font-weight: 700; color: #444; position: sticky; top: 0; z-index: 1; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: #f1f5f9; font-weight: 600; color: #000; }
+        
+        .hidden { display: none !important; }
+        .no-data { text-align: center; padding: 50px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <h1>⚾ 미대 야구부 기록실</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="선수 이름을 검색하세요 (예: 윤휘찬)">
+    </div>
+    
+    <div id="recordsContainer">
+        <!-- CSV 데이터가 이 곳에 렌더링 됩니다 -->
+    </div>
+
+    <script>
+        // CSV 파일을 불러와서 HTML 표로 변환하는 로직
+        fetch('gameone_records_2026_combined.csv')
+            .then(response => response.text())
+            .then(text => {
+                const lines = text.split('\n');
+                let html = '';
+                let inTable = false;
+
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    // 파이썬 코드로 넣었던 '===' 제목 구분선 처리
+                    if (line.startsWith('===')) {
+                        if (inTable) html += '</tbody></table></div></div>';
+                        const title = line.replace(/=/g, '').trim();
+                        html += `<div class="section-container"><h2>${title}</h2><div class="table-responsive"><table>`;
+                        inTable = false;
+                    } 
+                    // 열 이름(Header) 처리
+                    else if (line.includes(',') && !inTable) {
+                        const cols = line.split(',');
+                        html += `<thead><tr>`;
+                        cols.forEach(c => html += `<th>${c}</th>`);
+                        html += `</tr></thead><tbody>`;
+                        inTable = true;
+                    } 
+                    // 선수 데이터(Data) 처리
+                    else if (line.includes(',') && inTable) {
+                        const cols = line.split(',');
+                        html += `<tr class="data-row">`;
+                        cols.forEach(c => html += `<td>${c}</td>`);
+                        html += `</tr>`;
+                    }
+                });
+                if (inTable) html += '</tbody></table></div></div>';
+                document.getElementById('recordsContainer').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('recordsContainer').innerHTML = '<div class="no-data"><strong>데이터를 불러오지 못했습니다.</strong><br><br>※ 보안 정책(CORS)으로 인해 로컬 폴더에서 직접 열면 보이지 않을 수 있습니다.<br>VS Code의 Live Server 익스텐션을 이용하거나 웹(GitHub Pages 등)에 업로드하여 확인해주세요.</div>';
+            });
+
+        // 실시간 검색 필터링 로직
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase().replace(/\s+/g, ''); // 공백 무시 검색
+            const sections = document.querySelectorAll('.section-container');
+
+            sections.forEach(section => {
+                let hasVisibleRow = false;
+                const rows = section.querySelectorAll('.data-row');
+                
+                rows.forEach(row => {
+                    // 보통 '이름'이 두 번째(인덱스 1) 열에 위치함
+                    const nameCell = row.cells[1] ? row.cells[1].textContent.toLowerCase().replace(/\s+/g, '') : '';
+                    const fallbackCell = row.cells[0] ? row.cells[0].textContent.toLowerCase().replace(/\s+/g, '') : ''; // 1열에 이름이 있을 경우 대비
+                    
+                    if (nameCell.includes(searchValue) || fallbackCell.includes(searchValue)) {
+                        row.classList.remove('hidden');
+                        hasVisibleRow = true;
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+
+                // 검색된 선수가 해당 표(정규/미달/투수 등)에 한 명도 없으면 그 표 자체를 숨김
+                if (hasVisibleRow || searchValue === '') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
