@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>미대 야구부 기록실(26 전반기)</title>
+    <title>미대 야구부 기록실</title>
     <style>
-        /* 깔끔하고 직관적인 UI/UX 스타일링 */
         body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
         h1 { text-align: center; color: #111; font-weight: 800; margin-bottom: 30px; }
         
@@ -29,20 +28,60 @@
 </head>
 <body>
 
-    <h1>⚾ 미대 야구부 기록실</h1>
+    <h1>⚾ 미대 야구부 기록실(26 전반기)</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="선수끼리 비교를 해보세요 (예: 윤휘찬, 조창근)">
+        <input type="text" id="searchInput" placeholder="선수끼리 비교를 해보세요 (예: 윤휘찬 vs 조창근)">
     </div>
     
-    <div id="recordsContainer">
-        <!-- CSV 데이터가 이 곳에 렌더링 됩니다 -->
-    </div>
+    <div id="recordsContainer"></div>
 
     <script>
-        // 실시간 검색 필터링 로직 (다중 검색 및 vs 비교 지원)
+        // 1. CSV 데이터 렌더링 로직
+        fetch('gameone_records_2026_combined.csv')
+            .then(response => {
+                if (!response.ok) throw new Error('네트워크 응답이 정상이 아닙니다.');
+                return response.text();
+            })
+            .then(text => {
+                const lines = text.split('\n');
+                let html = '';
+                let inTable = false;
+
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    if (line.startsWith('===')) {
+                        if (inTable) html += '</tbody></table></div></div>';
+                        const title = line.replace(/=/g, '').trim();
+                        html += `<div class="section-container"><h2>${title}</h2><div class="table-responsive"><table>`;
+                        inTable = false;
+                    } 
+                    else if (line.includes(',') && !inTable) {
+                        const cols = line.split(',');
+                        html += `<thead><tr>`;
+                        cols.forEach(c => html += `<th>${c}</th>`);
+                        html += `</tr></thead><tbody>`;
+                        inTable = true;
+                    } 
+                    else if (line.includes(',') && inTable) {
+                        const cols = line.split(',');
+                        html += `<tr class="data-row">`;
+                        cols.forEach(c => html += `<td>${c}</td>`);
+                        html += `</tr>`;
+                    }
+                });
+                if (inTable) html += '</tbody></table></div></div>';
+                document.getElementById('recordsContainer').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('recordsContainer').innerHTML = '<div class="no-data"><strong>데이터를 불러오지 못했습니다.</strong><br><br>CSV 파일이 깃허브에 정상적으로 업로드되었는지 확인해주세요.</div>';
+                console.error(error);
+            });
+
+        // 2. 다중 검색 및 vs 비교 로직
         document.getElementById('searchInput').addEventListener('keyup', function() {
-            // 'vs' 또는 ',' 를 기준으로 검색어를 나누고 공백을 제거함
             const rawValue = this.value.toLowerCase();
             const searchTerms = rawValue.split(/vs|,/).map(term => term.replace(/\s+/g, '')).filter(term => term.length > 0);
             
@@ -58,11 +97,9 @@
                     
                     let isMatch = false;
                     
-                    // 검색어가 아무것도 없으면 기본적으로 모두 표시
                     if (searchTerms.length === 0) {
                         isMatch = true;
                     } else {
-                        // 입력된 여러 검색어 중 하나라도 일치하면 화면에 띄움
                         isMatch = searchTerms.some(term => nameCell.includes(term) || fallbackCell.includes(term));
                     }
 
@@ -74,7 +111,6 @@
                     }
                 });
 
-                // 검색된 선수가 해당 표에 한 명도 없으면 그 표 자체를 숨김
                 if (hasVisibleRow || searchTerms.length === 0) {
                     section.style.display = 'block';
                 } else {
@@ -83,6 +119,5 @@
             });
         });
     </script>
-
 </body>
 </html>
